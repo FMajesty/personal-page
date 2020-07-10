@@ -1,0 +1,104 @@
+{% load static %}
+
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.5.0/js/jquery.terminal.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.5.0/css/jquery.terminal.min.css" rel="stylesheet"/>
+    <link href="{% static 'css/style.css' %}" rel="stylesheet"/>
+    <script src="https://cdn.rawgit.com/inexorabletash/polyfill/master/keyboard.js"></script>
+    <title>help me</title>
+    <link rel="icon" type="img/png" href="{% static 'favicon-32x32.png' %}" sizes="32x32">
+    <meta property="og:image:secure_url" content="favicon-32x32.png">
+    <meta property="og:image" content="favicon-32x32.png">
+    <meta property="og:description" content="help">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="idk">
+</head>
+<body>
+    <div class="tv">
+        <div id="term"></div>
+        <div class="scanlines"></div>
+    </div>
+    <script>
+        var scanlines = $('.scanlines');
+        var tv = $('.tv');
+        var psychedelic = false;
+
+        var term = $('#term').terminal(function(command, term) {
+            if (command.match(/^\s*help\s*$/)) {
+                term.echo('Commands list:');
+                term.echo('[[b;#00FF00;]help] - this list');
+                {% for command in commands %}
+                    term.echo('[[b;#00FF00;]{{ command }}] - {{ command.help_text }}');
+                {% endfor %}
+            }
+            {% for command in commands %}
+                else if (command.match(/^\s*{{ command.name }}\s*$/)) {
+                    {{ command.code|safe }}
+                }
+            {% endfor %}
+            else if (command !== '') {
+                term.echo('Unknown command. Try \'help\'!');
+            } else {
+                term.echo('');
+            }
+        }, {
+            keymap: {
+                'ENTER': function(e, original) {
+                    let str;
+                    str = this.get_prompt() + this.get_command();
+                    this.echo(str);
+                    original(e);
+
+                    if (psychedelic) {
+                        $('span').addClass('effect-interference');
+                        $('a').addClass('effect-interference');
+                        $('img').addClass('psychedelicpic');
+                    } else {
+                        $('span').removeClass('effect-interference');
+                        $('a').removeClass('effect-interference');
+                        $('img').removeClass('psychedelicpic');
+                    }
+                }
+            },
+            echoCommand: false,
+            name: 'console',
+            onResize: set_size,
+            exit: false,
+            enabled: $('body').attr('onload') === undefined,
+            onInit: function() {
+                set_size();
+            },
+            prompt: '[guest@fmajesty.xyz ~]$ ',
+            greetings: "[[b;#fff;]Console (Version 10.1.17763.437)]\nYou can write 'help' for help.",
+            completion: ['help', {% for command in commands %}"{{ command }},"{% endfor %}]
+        });
+
+
+        function set_size() {
+            var height = $(window).height();
+            var width = $(window).width()
+            var time = (height * 2) / 170;
+
+            scanlines[0].style.setProperty("--time", time);
+            tv[0].style.setProperty("--width", width);
+            tv[0].style.setProperty("--height", height);
+
+            if (psychedelic) {
+                $('span').addClass('effect-interference');
+                $('a').addClass('effect-interference');
+            } else {
+                $('span').removeClass('effect-interference');
+                $('a').removeClass('effect-interference');
+            }
+        }
+
+
+        function tree(obj) {
+            term.echo(treeify.asTree(obj, true, true));
+        }
+    </script>
+</body>
