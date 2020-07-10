@@ -72,9 +72,9 @@
             onInit: function() {
                 set_size();
             },
-            prompt: '[guest@fmajesty.xyz ~]$ ',
+            prompt: '[guest@{{ hostnames|random }} ~]$ ',
             greetings: "[[b;#fff;]Console (Version 10.1.17763.437)]\nYou can write 'help' for help.",
-            completion: ['help', {% for command in commands %}"{{ command }},"{% endfor %}]
+            completion: ['help', {% for command in commands %}"{{ command }}"{% if not forloop.last %}, {% endif %}{% endfor %}]
         });
 
 

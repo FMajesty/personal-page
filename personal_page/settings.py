@@ -139,6 +139,14 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static/'),
 )
 
+# Cache Settings
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.dummy.DummyCache",
+    }
+}
+STATIC_PAGE_CACHE_SECONDS = 60 * 60  # 1 hour
+
 try:
     from .local_settings import *
 except ImportError:
